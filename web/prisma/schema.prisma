@@ -1,0 +1,347 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id            String     @id @default(cuid())
+  name          String?
+  email         String     @unique
+  password      String?
+  role          Role       @default(CUSTOMER)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  emailVerified DateTime?
+  image         String?
+  isActive      Boolean    @default(true)
+  lastLoginAt   DateTime?
+  addressLine1  String?
+  addressLine2  String?
+  city          String?
+  country       String?
+  phone         String?
+  postalCode    String?
+  state         String?
+  accounts      Account[]
+  orders        Order[]
+  sessions      Session[]
+  wishlists     Wishlist[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Category {
+  id        String     @id @default(cuid())
+  name      String
+  slug      String     @unique
+  parentId  String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @default(now()) @updatedAt
+  parent    Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children  Category[] @relation("CategoryHierarchy")
+  products  Product[]
+}
+
+model Product {
+  id              String           @id @default(cuid())
+  name            String
+  slug            String           @unique
+  description     String?
+  barcode         String?          @unique
+  sku             String?          @unique
+  price           Float
+  comparePrice    Float?
+  imageUrl        String?
+  isFeatured      Boolean          @default(false)
+  isTrending      Boolean          @default(false)
+  isBestSeller    Boolean          @default(false)
+  isArchived      Boolean          @default(false)
+  categoryId      String
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  gender          Gender           @default(UNISEX)
+  discountEndAt   DateTime?
+  discountStartAt DateTime?
+  discountType    DiscountType?
+  discountValue   Float?
+  isNewArrival    Boolean          @default(true)
+  stock           Int              @default(0)
+  orderItems      OrderItem[]
+  category        Category         @relation(fields: [categoryId], references: [id])
+  images          ProductImage[]
+  variants        ProductVariant[]
+  views           ProductView[]
+  saleItems       SaleItem[]
+  wishlists       Wishlist[]
+}
+
+model ProductImage {
+  id        String   @id @default(cuid())
+  productId String
+  imageUrl  String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model ProductVariant {
+  id           String      @id @default(cuid())
+  productId    String
+  size         String?
+  color        String?
+  sku          String?     @unique
+  barcode      String?     @unique
+  imageUrl     String?
+  stock        Int         @default(0)
+  price        Float?
+  comparePrice Float?
+  isActive     Boolean     @default(true)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  orderItems   OrderItem[]
+  product      Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model Order {
+  id               String          @id @default(cuid())
+  userId           String?
+  total            Float
+  status           OrderStatus     @default(PENDING)
+  createdAt        DateTime        @default(now())
+  isPaid           Boolean         @default(false)
+  paidAt           DateTime?
+  paymentMethod    PaymentMethod   @default(COD)
+  shippingAddress  String?
+  shippingCost     Float           @default(0)
+  shippingPhone    String?
+  updatedAt        DateTime        @updatedAt
+  shippingMethodId String?
+  customerEmail    String?
+  customerName     String?
+  couponCode       String?
+  discount         Float           @default(0)
+  shippingMethod   ShippingMethod? @relation(fields: [shippingMethodId], references: [id])
+  user             User?           @relation(fields: [userId], references: [id])
+  items            OrderItem[]
+}
+
+model OrderItem {
+  id        String          @id @default(cuid())
+  orderId   String
+  productId String
+  quantity  Int
+  price     Float
+  variantId String?
+  order     Order           @relation(fields: [orderId], references: [id])
+  product   Product         @relation(fields: [productId], references: [id])
+  variant   ProductVariant? @relation(fields: [variantId], references: [id])
+}
+
+model ShippingMethod {
+  id            String   @id @default(cuid())
+  name          String
+  price         Float
+  estimatedDays String?
+  isPickup      Boolean  @default(false)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  orders        Order[]
+}
+
+model StoreSettings {
+  id           String   @id @default(cuid())
+  storeName    String   @default("POSHMANSTYLE")
+  supportEmail String?
+  supportPhone String?
+  address      String?
+  currency     String   @default("BDT")
+  logoUrl      String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Wishlist {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+  product   Product  @relation(fields: [productId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, productId])
+}
+
+model Sale {
+  id        String     @id @default(cuid())
+  total     Float
+  createdAt DateTime   @default(now())
+  items     SaleItem[]
+}
+
+model SaleItem {
+  id        String  @id @default(cuid())
+  saleId    String
+  productId String
+  quantity  Int
+  price     Float
+  product   Product @relation(fields: [productId], references: [id])
+  sale      Sale    @relation(fields: [saleId], references: [id])
+}
+
+model Coupon {
+  id        String     @id @default(cuid())
+  code      String     @unique
+  type      CouponType
+  value     Float
+  minAmount Float?
+  expiresAt DateTime?
+  isActive  Boolean    @default(true)
+  createdAt DateTime   @default(now())
+}
+
+model PageView {
+  id        String   @id @default(cuid())
+  path      String
+  referrer  String?
+  sessionId String?
+  userAgent String?
+  country   String?
+  city      String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([path])
+}
+
+model SearchQuery {
+  id        String   @id @default(cuid())
+  query     String
+  results   Int
+  sessionId String?
+  createdAt DateTime @default(now())
+
+  @@index([query])
+  @@index([createdAt])
+}
+
+model ProductView {
+  id        String   @id @default(cuid())
+  productId String
+  sessionId String?
+  createdAt DateTime @default(now())
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([createdAt])
+}
+
+model CustomerJourney {
+  id        String   @id @default(cuid())
+
+  sessionId String
+
+  event     String
+
+  page      String?
+
+  productId String?
+
+  metadata  Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([sessionId])
+  @@index([event])
+
+  @@index([createdAt])
+}
+
+model AnalyticsEvent {
+  id String @id @default(cuid())
+
+  sessionId String
+  event String
+
+  path String?
+  productId String?
+  orderId String?
+
+  metadata Json?
+
+  createdAt DateTime @default(now())
+}
+
+enum CouponType {
+  PERCENTAGE
+  FIXED
+}
+
+enum Role {
+  ADMIN
+  CUSTOMER
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum Gender {
+  MEN
+  WOMEN
+  UNISEX
+  KIDS
+}
+
+enum PaymentMethod {
+  COD
+  STRIPE
+  BKASH
+  NAGAD
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED
+}
