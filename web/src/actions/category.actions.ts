@@ -151,21 +151,40 @@ export async function deleteCategory(id: string) {
     throw new Error("Unauthorized");
   }
 
-  // CHECK PRODUCTS
+  // FIND OR CREATE UNCATEGORIZED
 
-  const productsCount = await prisma.product.count({
+  const uncategorized = await prisma.category.upsert({
     where: {
-      categoryId: id,
+      slug: "uncategorized",
+    },
+
+    update: {},
+
+    create: {
+      name: "Uncategorized",
+      slug: "uncategorized",
     },
   });
 
-  if (productsCount > 0) {
-    throw new Error(
-      "Cannot delete category because products are assigned to it",
-    );
+  // PREVENT DELETING UNCATEGORIZED ITSELF
+
+  if (id === uncategorized.id) {
+    throw new Error("Cannot delete the Uncategorized category.");
   }
 
-  // REMOVE CHILD REFERENCES
+  // MOVE PRODUCTS
+
+  await prisma.product.updateMany({
+    where: {
+      categoryId: id,
+    },
+
+    data: {
+      categoryId: uncategorized.id,
+    },
+  });
+
+  // MOVE CHILD CATEGORIES
 
   await prisma.category.updateMany({
     where: {
@@ -173,11 +192,11 @@ export async function deleteCategory(id: string) {
     },
 
     data: {
-      parentId: null,
+      parentId: uncategorized.id,
     },
   });
 
-  // DELETE
+  // DELETE CATEGORY
 
   await prisma.category.delete({
     where: {
@@ -188,7 +207,6 @@ export async function deleteCategory(id: string) {
   // REVALIDATE
 
   revalidatePath("/admin/categories");
-
   revalidatePath("/shop");
 }
 
@@ -232,6 +250,24 @@ export async function getCategories() {
 
     orderBy: {
       createdAt: "asc",
+    },
+  });
+}
+
+// ========================
+// GET CATEGORY BY SLUG
+// ========================
+
+export async function getCategoryBySlug(slug: string) {
+  return prisma.category.findUnique({
+    where: {
+      slug,
+    },
+
+    include: {
+      parent: true,
+
+      children: true,
     },
   });
 }

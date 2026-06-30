@@ -1,8 +1,6 @@
 import NextAuth from "next-auth";
-
-import Credentials from "next-auth/providers/credentials";
-
 import Google from "next-auth/providers/google";
+import Credentials from "next-auth/providers/credentials";
 
 import bcrypt from "bcryptjs";
 
@@ -10,39 +8,30 @@ import { prisma } from "@/lib/prisma";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
-    // =========================================
-    // GOOGLE OAUTH (CUSTOMERS ONLY)
-    // =========================================
-
     Google({
       clientId: process.env.AUTH_GOOGLE_ID!,
-
       clientSecret: process.env.AUTH_GOOGLE_SECRET!,
     }),
 
-    // =========================================
-    // EMAIL + PASSWORD LOGIN
-    // =========================================
-
     Credentials({
-      credentials: {
-        email: {},
+      name: "Credentials",
 
-        password: {},
+      credentials: {
+        email: {
+          label: "Email",
+          type: "email",
+        },
+
+        password: {
+          label: "Password",
+          type: "password",
+        },
       },
 
       async authorize(credentials) {
-        // =========================
-        // VALIDATE INPUT
-        // =========================
-
         if (!credentials?.email || !credentials?.password) {
           return null;
         }
-
-        // =========================
-        // FIND USER
-        // =========================
 
         const user = await prisma.user.findUnique({
           where: {
@@ -50,145 +39,96 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           },
         });
 
-        if (!user) {
+        if (!user || !user.password) {
           return null;
         }
 
-        // =========================
-        // PASSWORD REQUIRED
-        // =========================
-
-        if (!user.password) {
-          return null;
-        }
-
-        // =========================
-        // VERIFY PASSWORD
-        // =========================
-
-        const isValid = await bcrypt.compare(
+        const valid = await bcrypt.compare(
           credentials.password as string,
           user.password,
         );
 
-        if (!isValid) {
+        if (!valid) {
           return null;
         }
 
-        // =========================
-        // RETURN SESSION USER
-        // =========================
-
         return {
           id: user.id,
-
-          email: user.email,
-
           name: user.name,
-
+          email: user.email,
+          image: user.image,
           role: user.role,
         };
       },
     }),
   ],
 
-  // =========================================
-  // SESSION
-  // =========================================
-
-  session: {
-    strategy: "jwt",
-  },
-
-  // =========================================
-  // CALLBACKS
-  // =========================================
-
   callbacks: {
-    // =========================
-    // GOOGLE LOGIN
-    // =========================
-
     async signIn({ user, account }) {
-      // GOOGLE USERS
-
       if (account?.provider === "google") {
-        const existingUser = await prisma.user.findUnique({
+        const existing = await prisma.user.findUnique({
           where: {
             email: user.email!,
           },
         });
 
-        // CREATE CUSTOMER
-
-        if (!existingUser) {
+        if (!existing) {
           await prisma.user.create({
             data: {
-              name: user.name,
-
+              name: user.name ?? "",
               email: user.email!,
-
-              role: "CUSTOMER",
+              image: user.image,
             },
           });
         }
+
+        return true;
       }
 
       return true;
     },
 
-    // =========================
-    // JWT
-    // =========================
-
-    async jwt({ token }) {
-      if (!token.email) {
-        return token;
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = (user as any).id;
+        token.role = (user as any).role;
       }
 
-      const user = await prisma.user.findUnique({
-        where: {
-          email: token.email,
-        },
-      });
+      if (token.email) {
+        const dbUser = await prisma.user.findUnique({
+          where: {
+            email: token.email,
+          },
+        });
 
-      if (!user) {
-        return token;
+        if (dbUser) {
+          token.id = dbUser.id;
+          token.role = dbUser.role;
+          token.picture = dbUser.image;
+        }
       }
-
-      token.id = user.id;
-
-      token.role = user.role;
 
       return token;
     },
 
-    // =========================
-    // SESSION
-    // =========================
-
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.id as string;
-
-        session.user.role = token.role as string;
+        (session.user as any).id = token.id;
+        (session.user as any).role = token.role;
+        session.user.image = token.picture as string | null;
       }
 
       return session;
     },
   },
 
-  // =========================================
-  // CUSTOM PAGES
-  // =========================================
-
-  pages: {
-    signIn: "/login",
+  session: {
+    strategy: "jwt",
   },
 
-  // =========================================
-  // SECRET
-  // =========================================
+  pages: {
+    signIn: "/shop/login",
+  },
 
   secret: process.env.AUTH_SECRET,
 });

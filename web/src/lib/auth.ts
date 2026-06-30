@@ -1,5 +1,4 @@
 import { auth } from "@/auth";
-
 import { permissions } from "./permissions";
 
 type Role = keyof typeof permissions;
@@ -15,5 +14,5 @@ export async function hasPermission(permission: string) {
 
   const rolePermissions = permissions[role];
 
-  return rolePermissions.includes(permission);
+  return (rolePermissions as string[]).includes(permission);
 }

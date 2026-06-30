@@ -38,12 +38,8 @@ export default async function NewArrivalsPage() {
           {products.map((product) => (
             <ProductCard
               key={product.id}
-              product={{
-                ...product,
-
-                imageUrl:
-                  product.images?.[0]?.imageUrl || product.imageUrl || null,
-              }}
+              product={product
+              }
             />
           ))}
         </div>

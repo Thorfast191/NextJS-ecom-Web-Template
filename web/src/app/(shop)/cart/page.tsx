@@ -53,11 +53,25 @@ export default function CartPage() {
               >
                 {/* IMAGE */}
 
-                <img
-                  src={item.imageUrl || "/placeholder.png"}
-                  alt={item.name}
-                  className="w-32 h-32 object-cover rounded-2xl border border-slate-800"
-                />
+                {item.imageUrl ? (
+                  <img
+                    src={item.imageUrl}
+                    alt={item.name}
+                    className="w-32 h-32 object-cover rounded-2xl border border-slate-800"
+                  />
+                ) : (
+                  <div className="flex h-32 w-32 flex-shrink-0 items-center justify-center rounded-2xl border border-slate-800 bg-slate-950">
+                    <div className="text-center">
+                      <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-slate-800">
+                        <span className="text-lg">🛍️</span>
+                      </div>
+
+                      <p className="text-[10px] font-medium uppercase tracking-wider text-slate-500">
+                        No Image
+                      </p>
+                    </div>
+                  </div>
+                )}
 
                 {/* INFO */}
 
@@ -118,7 +132,11 @@ export default function CartPage() {
 
                   <div className="flex items-center gap-3 mt-6">
                     <button
-                      onClick={() => decreaseQuantity(item.variantId)}
+                      onClick={() =>
+                        decreaseQuantity(
+                          `${item.productId}-${item.variantId ?? "default"}`,
+                        )
+                      }
                       className="w-10 h-10 rounded-lg bg-slate-800 hover:bg-slate-700 flex items-center justify-center transition"
                     >
                       <Minus size={16} />
@@ -129,7 +147,11 @@ export default function CartPage() {
                     </span>
 
                     <button
-                      onClick={() => increaseQuantity(item.variantId)}
+                      onClick={() =>
+                        increaseQuantity(
+                          `${item.productId}-${item.variantId ?? "default"}`,
+                        )
+                      }
                       disabled={item.quantity >= item.stock}
                       className="w-10 h-10 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:bg-slate-700 disabled:text-slate-500 flex items-center justify-center transition"
                     >
@@ -141,7 +163,11 @@ export default function CartPage() {
                 {/* REMOVE */}
 
                 <button
-                  onClick={() => removeItem(item.variantId)}
+                  onClick={() =>
+                    removeItem(
+                      `${item.productId}-${item.variantId ?? "default"}`,
+                    )
+                  }
                   className="text-red-400 hover:text-red-300 transition"
                 >
                   <Trash2 size={20} />
@@ -169,7 +195,7 @@ export default function CartPage() {
               <div className="flex items-center justify-between">
                 <span className="text-slate-400">Shipping</span>
 
-                <span>Free</span>
+                <span>As per your requirement.</span>
               </div>
 
               {/* TOTAL */}

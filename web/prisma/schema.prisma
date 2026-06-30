@@ -93,7 +93,7 @@ model Product {
   isTrending      Boolean          @default(false)
   isBestSeller    Boolean          @default(false)
   isArchived      Boolean          @default(false)
-  categoryId      String
+  categoryId      String?
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
   gender          Gender           @default(UNISEX)
@@ -104,7 +104,7 @@ model Product {
   isNewArrival    Boolean          @default(true)
   stock           Int              @default(0)
   orderItems      OrderItem[]
-  category        Category         @relation(fields: [categoryId], references: [id])
+  category        Category?         @relation(fields: [categoryId], references: [id])
   images          ProductImage[]
   variants        ProductVariant[]
   views           ProductView[]

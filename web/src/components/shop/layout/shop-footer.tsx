@@ -19,37 +19,49 @@ export default function ShopFooter() {
               aesthetics, and timeless minimal style.
             </p>
 
-            {/* SOCIALS */}
+{/* SOCIALS */}
 
-            <div className="flex items-center gap-4 mt-8">
-              <a
-                href="#"
-                className="w-11 h-11 rounded-full border border-slate-700 flex items-center justify-center hover:bg-white hover:text-black transition"
-              >
-                <FaFacebookF size={18} />
-              </a>
+<div className="flex items-center gap-4 mt-8">
+  <a
+    href="https://www.facebook.com/Poshmanstyle"
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="Facebook"
+    className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-700 transition hover:border-blue-500 hover:bg-blue-600 hover:text-white"
+  >
+    <FaFacebookF size={18} />
+  </a>
 
-              <a
-                href="#"
-                className="w-11 h-11 rounded-full border border-slate-700 flex items-center justify-center hover:bg-white hover:text-black transition"
-              >
-                <FaInstagram size={18} />
-              </a>
+  <a
+    href="#"
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="Instagram"
+    className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-700 transition hover:border-pink-500 hover:bg-pink-600 hover:text-white"
+  >
+    <FaInstagram size={18} />
+  </a>
 
-              <a
-                href="#"
-                className="w-11 h-11 rounded-full border border-slate-700 flex items-center justify-center hover:bg-white hover:text-black transition"
-              >
-                <FaTwitter size={18} />
-              </a>
+  <a
+    href="#"
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="X (Twitter)"
+    className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-700 transition hover:border-sky-500 hover:bg-sky-500 hover:text-white"
+  >
+    <FaTwitter size={18} />
+  </a>
 
-              <a
-                href="#"
-                className="w-11 h-11 rounded-full border border-slate-700 flex items-center justify-center hover:bg-white hover:text-black transition"
-              >
-                <FaYoutube size={18} />
-              </a>
-            </div>
+  <a
+    href="#"
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="YouTube"
+    className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-700 transition hover:border-red-500 hover:bg-red-600 hover:text-white"
+  >
+    <FaYoutube size={18} />
+  </a>
+</div>
           </div>
 
           {/* SHOP */}
@@ -134,15 +146,9 @@ export default function ShopFooter() {
 
       {/* BOTTOM */}
 
-      <div className="border-t border-slate-800">
-        <div className="max-w-7xl mx-auto px-6 py-6 flex flex-col md:flex-row gap-4 items-center justify-between">
-          <p className="text-slate-500 text-sm">
-            © 2026 POSHMANSTYLE. All rights reserved.
-          </p>
-
-          <p className="text-slate-500 text-sm">Built with Next.js & Prisma</p>
-        </div>
-      </div>
+<p className="text-slate-500 text-sm">
+  Premium Fashion • Secure Shopping • Worldwide Delivery
+</p>
     </footer>
   );
 }

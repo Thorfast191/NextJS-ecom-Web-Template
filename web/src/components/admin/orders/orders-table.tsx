@@ -6,7 +6,7 @@ interface Props {
 
 export default function OrdersTable({ orders }: Props) {
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+    <div className="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900">
       <table className="w-full">
         {/* HEADER */}
 
@@ -14,7 +14,7 @@ export default function OrdersTable({ orders }: Props) {
           <tr className="text-left">
             <th className="p-4">Customer</th>
 
-            <th className="p-4">Phone</th>
+            <th className="p-4">Products</th>
 
             <th className="p-4">Total</th>
 
@@ -23,8 +23,6 @@ export default function OrdersTable({ orders }: Props) {
             <th className="p-4">Status</th>
 
             <th className="p-4">Date</th>
-
-            <th className="p-4">Items</th>
 
             <th className="p-4">Update</th>
           </tr>
@@ -49,21 +47,41 @@ export default function OrdersTable({ orders }: Props) {
                     </p>
                   )}
 
+                  {order.shippingPhone && (
+                    <p className="mt-1 text-sm text-slate-500">
+                      {order.shippingPhone}
+                    </p>
+                  )}
+
                   {order.shippingAddress && (
-                    <p className="text-sm text-slate-500 mt-1">
+                    <p className="mt-1 text-sm text-slate-500">
                       {order.shippingAddress}
                     </p>
                   )}
                 </div>
               </td>
 
-              {/* PHONE */}
+              {/* PRODUCTS */}
 
-              <td className="p-4">{order.shippingPhone}</td>
+              <td className="p-4">
+                <div className="space-y-2">
+                  {order.items.map((item: any) => (
+                    <div key={item.id} className="rounded-lg bg-slate-950 p-2">
+                      <p className="font-medium">
+                        {item.product?.name || item.name}
+                      </p>
+
+                      <p className="text-xs text-slate-400">
+                        Qty: {item.quantity}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </td>
 
               {/* TOTAL */}
 
-              <td className="p-4 font-semibold">₹ {order.total}</td>
+              <td className="p-4 font-semibold">৳ {order.total}</td>
 
               {/* PAYMENT */}
 
@@ -85,7 +103,7 @@ export default function OrdersTable({ orders }: Props) {
 
               <td className="p-4">
                 <span
-                  className={`text-sm font-medium ${
+                  className={`font-medium ${
                     order.status === "DELIVERED"
                       ? "text-green-400"
                       : order.status === "CANCELLED"
@@ -105,20 +123,6 @@ export default function OrdersTable({ orders }: Props) {
                 {new Date(order.createdAt).toLocaleDateString()}
               </td>
 
-              {/* ITEMS */}
-
-              <td className="p-4">
-                <div className="space-y-2">
-                  {order.items.map((item: any) => (
-                    <div key={item.id} className="text-sm">
-                      <p>{item.product?.name}</p>
-
-                      <p className="text-slate-500">Qty: {item.quantity}</p>
-                    </div>
-                  ))}
-                </div>
-              </td>
-
               {/* UPDATE */}
 
               <td className="p-4">
@@ -128,20 +132,16 @@ export default function OrdersTable({ orders }: Props) {
                   <select
                     name="status"
                     defaultValue={order.status}
-                    className="bg-slate-950 border border-slate-800 h-10 px-3 rounded-lg"
+                    className="h-10 w-full rounded-lg border border-slate-800 bg-slate-950 px-3"
                   >
                     <option value="PENDING">PENDING</option>
-
                     <option value="PAID">PAID</option>
-
                     <option value="SHIPPED">SHIPPED</option>
-
                     <option value="DELIVERED">DELIVERED</option>
-
                     <option value="CANCELLED">CANCELLED</option>
                   </select>
 
-                  <button className="bg-blue-600 hover:bg-blue-700 h-10 px-4 rounded-lg w-full text-sm">
+                  <button className="h-10 w-full rounded-lg bg-blue-600 text-sm hover:bg-blue-700">
                     Update
                   </button>
                 </form>

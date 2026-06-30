@@ -36,15 +36,13 @@ export default async function TrendingPage() {
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
           {products.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={{
-                ...product,
+<ProductCard
 
-                imageUrl:
-                  product.images?.[0]?.imageUrl || product.imageUrl || null,
-              }}
-            />
+  key={product.id}
+
+  product={product}
+
+/>
           ))}
         </div>
       </div>

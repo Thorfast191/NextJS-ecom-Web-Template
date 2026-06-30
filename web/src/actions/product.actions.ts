@@ -602,3 +602,41 @@ export async function toggleProductFlag(
 
   revalidatePath("/admin/products");
 }
+
+// ========================
+// PRODUCTS BY CATEGORY
+// ========================
+
+export async function getProductsByCategory(slug: string) {
+  return prisma.product.findMany({
+    where: {
+      isArchived: false,
+
+      category: {
+        slug,
+      },
+    },
+
+    include: {
+      images: {
+        orderBy: {
+          sortOrder: "asc",
+        },
+      },
+
+      variants: {
+        where: {
+          isActive: true,
+        },
+
+        orderBy: {
+          createdAt: "asc",
+        },
+      },
+    },
+
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+}

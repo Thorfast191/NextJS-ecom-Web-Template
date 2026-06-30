@@ -115,3 +115,42 @@ export async function updateProductVariants(
 
   revalidatePath("/admin/products");
 }
+
+export async function getProductsByCategory(slug: string) {
+  const category = await prisma.category.findUnique({
+    where: {
+      slug,
+    },
+    include: {
+      children: {
+        select: {
+          id: true,
+        },
+      },
+    },
+  });
+
+  if (!category) return [];
+
+  const categoryIds = [category.id, ...category.children.map((c) => c.id)];
+
+  return prisma.product.findMany({
+    where: {
+      categoryId: {
+        in: categoryIds,
+      },
+
+      isArchived: false,
+    },
+
+    include: {
+      category: true,
+      images: true,
+      variants: true,
+    },
+
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+}

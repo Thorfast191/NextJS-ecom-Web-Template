@@ -17,7 +17,7 @@ import { getProductPrice } from "@/lib/pricing";
 interface CreateOrderInput {
   items: {
     productId: string;
-    variantId: string;
+    variantId?: string;
     quantity: number;
   }[];
 

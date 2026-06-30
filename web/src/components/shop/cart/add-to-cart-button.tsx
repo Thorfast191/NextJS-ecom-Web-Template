@@ -6,15 +6,29 @@ interface Props {
   product: {
     id: string;
 
+    variantId?: string;
+
     name: string;
 
-    slug: string;
+    slug?: string;
 
     imageUrl?: string | null;
 
     price: number;
 
     stock: number;
+
+    size?: string | null;
+
+    color?: string | null;
+
+    sku?: string | null;
+
+    originalPrice?: number;
+
+    discountType?: string | null;
+
+    discountValue?: number | null;
   };
 }
 
@@ -26,15 +40,29 @@ export default function AddToCartButton({ product }: Props) {
       disabled={product.stock <= 0}
       onClick={() =>
         addItem({
-          id: product.id,
+          productId: product.id,
+
+          variantId: product.variantId,
 
           name: product.name,
 
-          slug: product.slug,
+          slug: product.slug || "",
 
           imageUrl: product.imageUrl,
 
+          size: product.size,
+
+          color: product.color,
+
+          sku: product.sku,
+
           price: product.price,
+
+          originalPrice: product.originalPrice,
+
+          discountType: product.discountType,
+
+          discountValue: product.discountValue,
 
           stock: product.stock,
 
